@@ -1,0 +1,173 @@
+table Sales
+	lineageTag: 0ff7a262-f6fd-4d9a-8daf-d2e7584d7101
+
+	measure Profit =
+			
+			SUM('Sales'[Sales]) - SUM('Sales'[Cost])
+		formatString: \$#,0.0;(\$#,0.0);\$#,0.0
+		lineageTag: c8d5ccda-cf91-46f1-9db1-fd386562bc32
+
+		extendedProperty MeasureTemplate =
+				{
+				  "version": 0,
+				  "daxTemplateName": "MathematicalSubtraction"
+				}
+
+		changedProperty = FormatString
+
+	measure 'Profit Margin' = DIVIDE([Profit], SUM('Sales'[Sales]))
+		formatString: 0.00%;-0.00%;0.00%
+		lineageTag: 17d33dc2-3474-48bf-95f1-bb123cc19da1
+
+	measure 'Sales YTD' = TOTALYTD(SUM('Sales'[Sales]), dimDate[Date])
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 00d9be32-2352-4756-a205-b8a943d9b2c7
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column SalesOrderNumber
+		dataType: string
+		lineageTag: 5635f587-86a1-404f-a750-2a17a8e54e36
+		summarizeBy: none
+		sourceColumn: SalesOrderNumber
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column OrderDate
+		dataType: dateTime
+		isHidden
+		formatString: Short Date
+		lineageTag: b4d95166-c7aa-4155-8dae-02cf28ece96d
+		summarizeBy: none
+		sourceColumn: OrderDate
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column ProductKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: ef8c078d-3404-40fb-99c2-3b1639589f09
+		summarizeBy: none
+		sourceColumn: ProductKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column ResellerKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: fe1b439f-c4db-4a1f-86b1-cd90565f074e
+		summarizeBy: none
+		sourceColumn: ResellerKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column EmployeeKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 27bc1564-65a7-4e15-98ce-16adc89fe000
+		summarizeBy: none
+		sourceColumn: EmployeeKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesTerritoryKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: d21ad51b-0a3f-4330-8c09-f20bf199f94a
+		summarizeBy: none
+		sourceColumn: SalesTerritoryKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Quantity
+		dataType: int64
+		formatString: 0
+		lineageTag: 46c4ac9e-8caf-49ab-991e-446734809496
+		summarizeBy: sum
+		sourceColumn: Quantity
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Unit Price'
+		dataType: decimal
+		lineageTag: 0ef56261-3bfc-4138-883f-f6838f0fcb93
+		summarizeBy: sum
+		sourceColumn: Unit Price
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"isGeneralNumber":true}
+
+	column Sales
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 2bb9b223-f51e-4b62-9289-8523ba5dcf6b
+		summarizeBy: sum
+		sourceColumn: Sales
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Cost
+		dataType: decimal
+		formatString: \$#,0.###############;(\$#,0.###############);\$#,0.###############
+		lineageTag: 642b0048-7123-4e09-a4c2-fb9e53e041a5
+		summarizeBy: sum
+		sourceColumn: Cost
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation PBI_FormatHint = {"currencyCulture":"en-US"}
+
+	column OY = YEAR(Sales[OrderDate])
+		formatString: 0
+		lineageTag: 7bf7be9c-d626-4787-89fb-cae53c71873e
+		summarizeBy: none
+
+		annotation SummarizationSetBy = User
+
+	partition Sales = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(pServer, pDB),
+				    dbo_FactResellerSales = Source{[Schema="dbo",Item="FactResellerSales"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_FactResellerSales,{"SalesOrderNumber", "OrderDate", "ProductKey", "ResellerKey", "EmployeeKey", "SalesTerritoryKey", "OrderQuantity", "UnitPrice", "TotalProductCost", "SalesAmount", "DimProduct"}),
+				    #"Expanded DimProduct" = Table.ExpandRecordColumn(#"Removed Other Columns", "DimProduct", {"StandardCost"}, {"StandardCost"}),
+				    #"Added Custom" = Table.AddColumn(#"Expanded DimProduct", "Cost", each if [TotalProductCost] = null then [OrderQuantity] * [StandardCost] else [TotalProductCost]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Added Custom",{{"Cost", Currency.Type}}),
+				    #"Removed Columns" = Table.RemoveColumns(#"Changed Type",{"TotalProductCost", "StandardCost"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Columns",{{"OrderQuantity", "Quantity"}, {"UnitPrice", "Unit Price"}, {"SalesAmount", "Sales"}}),
+				    #"Changed Type1" = Table.TransformColumnTypes(#"Renamed Columns",{{"Sales", Currency.Type}, {"Unit Price", Currency.Type}, {"Quantity", Int64.Type}})
+				in
+				    #"Changed Type1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

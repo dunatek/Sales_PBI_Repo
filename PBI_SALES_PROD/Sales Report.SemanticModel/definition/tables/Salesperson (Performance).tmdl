@@ -1,0 +1,76 @@
+table 'Salesperson (Performance)'
+	lineageTag: 5aaafede-3e5f-4d68-af58-5c184ead66d5
+
+	column EmployeeKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: fb2da5a2-2b54-4127-b9db-bb89810ae013
+		summarizeBy: none
+		sourceColumn: EmployeeKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column EmployeeID
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: c6fa7cf1-b5a6-4c1e-866f-11d3ce322dcf
+		summarizeBy: none
+		sourceColumn: EmployeeID
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Title
+		dataType: string
+		lineageTag: 24d9acea-ac6e-40b7-8211-fb1148af0bd1
+		summarizeBy: none
+		sourceColumn: Title
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column UPN
+		dataType: string
+		isHidden
+		lineageTag: c359ee89-0e92-487c-9d42-312f4157a048
+		summarizeBy: none
+		sourceColumn: UPN
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Salesperson
+		dataType: string
+		lineageTag: 6cc9afb8-14b1-442e-ad9e-6a07fd846b73
+		summarizeBy: none
+		sourceColumn: Salesperson
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition 'Salesperson (Performance)' = m
+		mode: import
+		source =
+				let
+				    abc = Sql.Database(pServer, pDB),
+				    dbo_DimEmployee = abc{[Schema="dbo",Item="DimEmployee"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(dbo_DimEmployee, each ([SalesPersonFlag] = true)),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Filtered Rows",{"EmployeeKey", "EmployeeNationalIDAlternateKey", "FirstName", "LastName", "Title", "EmailAddress"}),
+				    #"Merged Columns" = Table.CombineColumns(#"Removed Other Columns",{"FirstName", "LastName"},Combiner.CombineTextByDelimiter(" ", QuoteStyle.None),"Merged"),
+				    #"Renamed Columns" = Table.RenameColumns(#"Merged Columns",{{"Merged", "Salesperson"}, {"EmployeeNationalIDAlternateKey", "EmployeeID"}, {"EmailAddress", "UPN"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

@@ -1,0 +1,38 @@
+expression pServer = "MSI" meta [IsParameterQuery=true, List={"MSI"}, DefaultValue="MSI", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 6ee1fbd0-3950-471d-9325-0090f3a06559
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression pDB = "AdventureWorksDW2020" meta [IsParameterQuery=true, List={"AdventureWorksDW2020"}, DefaultValue="AdventureWorksDW2020", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 1a678689-797d-4d3e-9694-95e6c3cfcde8
+
+	annotation PBI_ResultType = Text
+
+expression pColor = "C:\PBI\Data\LAB\ColorFormats.csv" meta [IsParameterQuery=true, List={"C:\PBI\Data\LAB\ColorFormats.csv"}, DefaultValue="C:\PBI\Data\LAB\ColorFormats.csv", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: a11c3791-c3ce-4bb1-8cf9-4e5a3e25e5eb
+
+	annotation PBI_ResultType = Text
+
+expression pResellerSalesTargets = "C:\PBI\Data\LAB\ResellerSalesTargets.csv" meta [IsParameterQuery=true, List={"C:\PBI\Data\LAB\ResellerSalesTargets.csv"}, DefaultValue="C:\PBI\Data\LAB\ResellerSalesTargets.csv", Type="Text", IsParameterQueryRequired=true]
+	lineageTag: 9b6e17e3-6ce0-4ac2-99a3-edd7f36c9f43
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Text
+
+expression ColorFormats =
+		let
+		    Source = Csv.Document(File.Contents(pColor),[Delimiter=",", Columns=3, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+		    #"Changed Type" = Table.TransformColumnTypes(Source,{{"Column1", type text}, {"Column2", type text}, {"Column3", type text}}),
+		    #"Promoted Headers" = Table.PromoteHeaders(#"Changed Type", [PromoteAllScalars=true]),
+		    #"Changed Type1" = Table.TransformColumnTypes(#"Promoted Headers",{{"Color", type text}, {"Background Color Format", type text}, {"Font Color Format", type text}})
+		in
+		    #"Changed Type1"
+	lineageTag: eb0394da-1ebe-46f9-b767-6adcc0038d23
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

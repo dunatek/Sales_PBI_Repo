@@ -1,0 +1,52 @@
+relationship 0c5873a2-6da1-4a51-9640-ea271bc7de3a
+	fromColumn: SalespersonRegion.EmployeeKey
+	toColumn: 'Salesperson (Performance)'.EmployeeKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship 50739f61-816c-4ada-b6d4-0ffbfc5aff88
+	crossFilteringBehavior: bothDirections
+	fromColumn: SalespersonRegion.SalesTerritoryKey
+	toColumn: Region.SalesTerritoryKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship abdad49a-1527-4892-9790-f0141e6d8a65
+	fromColumn: Sales.ProductKey
+	toColumn: Product.ProductKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship d16c5856-0ace-4c3e-ae63-0503b36a76fe
+	crossFilteringBehavior: bothDirections
+	fromColumn: Sales.ResellerKey
+	toColumn: Reseller.ResellerKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship 123e9f3d-7d62-418d-b123-99b69db9dd5a
+	fromColumn: Sales.SalesTerritoryKey
+	toColumn: Region.SalesTerritoryKey
+
+	annotation PBI_IsFromSource = FS
+
+relationship c3dbcc92-1c06-af23-83b6-feffcd76e67c
+	fromColumn: Targets.EmployeeID
+	toColumn: 'Salesperson (Performance)'.EmployeeID
+
+relationship 2bf7d43c-fdb0-169d-b299-0d01158d5bbd
+	fromColumn: Sales.EmployeeKey
+	toColumn: Salesperson.EmployeeKey
+
+relationship 0d34203c-4b97-4a58-4f51-3d921407604e
+	fromColumn: Sales.OrderDate
+	toColumn: Date.Date
+
+relationship b785bdbb-61c8-d4bc-616f-4be0b151af23
+	fromColumn: Targets.TargetMonth
+	toColumn: Date.Date
+
+relationship a044ef2c-01a7-49cb-a5d3-b197e7b01acc
+	fromColumn: Sales.OrderDate
+	toColumn: dimDate.Date
+

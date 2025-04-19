@@ -1,0 +1,85 @@
+table Reseller
+	lineageTag: 1ed2c381-7d5c-449e-a94a-989bfc5e8014
+
+	column ResellerKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: b69dbef5-6bdc-4a88-bacd-0133af351e78
+		summarizeBy: none
+		sourceColumn: ResellerKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column 'Business Type'
+		dataType: string
+		lineageTag: d9aed00b-dea6-4492-8ae6-f67acfb7dfcf
+		summarizeBy: none
+		sourceColumn: Business Type
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Reseller
+		dataType: string
+		lineageTag: c72a4cf9-21a8-4d6a-8799-40267a57c251
+		summarizeBy: none
+		sourceColumn: Reseller
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column City
+		dataType: string
+		lineageTag: 5c5e2750-cd2a-4e1c-aed4-7fe07399a561
+		summarizeBy: none
+		sourceColumn: City
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column State-Province
+		dataType: string
+		lineageTag: 2081dad0-c273-4c04-8fe8-028839b3fde6
+		dataCategory: StateOrProvince
+		summarizeBy: none
+		sourceColumn: State-Province
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country-Region
+		dataType: string
+		lineageTag: 275b9267-46e1-4d4a-8dc9-9b83ad6615ab
+		summarizeBy: none
+		sourceColumn: Country-Region
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Reseller = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(pServer, pDB),
+				    dbo_DimReseller = Source{[Schema="dbo",Item="DimReseller"]}[Data],
+				    #"Removed Other Columns" = Table.SelectColumns(dbo_DimReseller,{"ResellerKey", "BusinessType", "ResellerName", "DimGeography"}),
+				    #"Expanded DimGeography" = Table.ExpandRecordColumn(#"Removed Other Columns", "DimGeography", {"City", "StateProvinceName", "EnglishCountryRegionName"}, {"City", "StateProvinceName", "EnglishCountryRegionName"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Expanded DimGeography",{{"BusinessType", "Business Type"}}),
+				    #"Replaced Value" = Table.ReplaceValue(#"Renamed Columns","Ware house","Warehouse",Replacer.ReplaceText,{"Business Type"}),
+				    #"Renamed Columns1" = Table.RenameColumns(#"Replaced Value",{{"ResellerName", "Reseller"}, {"StateProvinceName", "State-Province"}, {"EnglishCountryRegionName", "Country-Region"}})
+				in
+				    #"Renamed Columns1"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

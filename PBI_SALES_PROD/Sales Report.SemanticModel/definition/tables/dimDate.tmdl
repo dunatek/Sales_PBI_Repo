@@ -1,0 +1,43 @@
+table dimDate
+	lineageTag: 00702de2-ae3b-4501-b60a-c9bd4d511ac3
+
+	column Date
+		formatString: Short Date
+		lineageTag: d3376c37-d638-4db5-ae71-352c9df1df49
+		summarizeBy: none
+		isNameInferred
+		sourceColumn: [Date]
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column Year = "CY" & YEAR(dimDate[Date])
+		lineageTag: a9ab1055-3107-4480-ab69-e1e242391f79
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	column Month = FORMAT(dimDate[Date], "YYYY-MM")
+		lineageTag: add26908-2083-4878-8f1c-b9c419f9646c
+		summarizeBy: none
+
+		annotation SummarizationSetBy = Automatic
+
+	hierarchy Calendar
+		lineageTag: 30df0621-fa74-4549-b4cc-b439f59a8f09
+
+		level Year
+			lineageTag: dc6c97a2-e61d-4ca2-b459-30d5b44018cf
+			column: Year
+
+		level Month
+			lineageTag: 9369fa6b-8d87-4d9c-a165-bdbafb04dcf0
+			column: Month
+
+	partition dimDate = calculated
+		mode: import
+		source = CALENDARAUTO()
+
+	annotation PBI_Id = b913dfb38f7849dfa91a84658fcf7518
+

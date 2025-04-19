@@ -1,0 +1,63 @@
+table Region
+	lineageTag: 8f72a69a-008e-4ac4-ba72-19cfb03f1b90
+
+	column SalesTerritoryKey
+		dataType: int64
+		isHidden
+		isKey
+		formatString: 0
+		lineageTag: 264321df-10b4-4ec8-a843-0d041631006d
+		summarizeBy: none
+		sourceColumn: SalesTerritoryKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Region
+		dataType: string
+		lineageTag: 3a247340-b93b-44b6-8b22-b8906082551e
+		summarizeBy: none
+		sourceColumn: Region
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Country
+		dataType: string
+		lineageTag: 6add8d0b-b29f-4b75-99f0-98bbc73e7082
+		dataCategory: County
+		summarizeBy: none
+		sourceColumn: Country
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column Group
+		dataType: string
+		lineageTag: 148486fd-f7ea-49fc-98c9-af32d8bfd879
+		summarizeBy: none
+		sourceColumn: Group
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition Region = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(pServer, pDB),
+				    dbo_DimSalesTerritory = Source{[Schema="dbo",Item="DimSalesTerritory"]}[Data],
+				    #"Filtered Rows" = Table.SelectRows(dbo_DimSalesTerritory, each ([SalesTerritoryAlternateKey] <> 0)),
+				    #"Removed Other Columns" = Table.SelectColumns(#"Filtered Rows",{"SalesTerritoryKey", "SalesTerritoryRegion", "SalesTerritoryCountry", "SalesTerritoryGroup"}),
+				    #"Renamed Columns" = Table.RenameColumns(#"Removed Other Columns",{{"SalesTerritoryRegion", "Region"}, {"SalesTerritoryCountry", "Country"}, {"SalesTerritoryGroup", "Group"}})
+				in
+				    #"Renamed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+

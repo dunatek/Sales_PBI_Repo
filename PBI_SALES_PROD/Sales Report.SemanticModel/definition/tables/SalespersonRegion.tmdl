@@ -1,0 +1,41 @@
+table SalespersonRegion
+	lineageTag: 0cfe66c3-d22f-497f-be2a-1fa19243e864
+
+	column EmployeeKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 04a05d0d-9c38-4ee0-b0b9-bbd37600de5a
+		summarizeBy: none
+		sourceColumn: EmployeeKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	column SalesTerritoryKey
+		dataType: int64
+		isHidden
+		formatString: 0
+		lineageTag: 365547d0-961d-436b-aee5-e08221da266f
+		summarizeBy: none
+		sourceColumn: SalesTerritoryKey
+
+		changedProperty = IsHidden
+
+		annotation SummarizationSetBy = Automatic
+
+	partition SalespersonRegion = m
+		mode: import
+		source =
+				let
+				    Source = Sql.Database(pServer, pDB),
+				    dbo_DimEmployeeSalesTerritory = Source{[Schema="dbo",Item="DimEmployeeSalesTerritory"]}[Data],
+				    #"Removed Columns" = Table.RemoveColumns(dbo_DimEmployeeSalesTerritory,{"DimEmployee", "DimSalesTerritory"})
+				in
+				    #"Removed Columns"
+
+	annotation PBI_NavigationStepName = Navigation
+
+	annotation PBI_ResultType = Table
+
